@@ -20,9 +20,10 @@ export function Player() {
         isLooping,
         isShuffling,
         togglePlay,
-        toogleLoop,
-        toogleShuffle,
+        toggleLoop,
+        toggleShuffle,
         setPlayingState,
+        clearPlayerState,
         playNext,
         playPrevious,
         hasNext,
@@ -45,6 +46,19 @@ export function Player() {
         audioRef.current.addEventListener('timeupdate', () => {
             setProgress(Math.floor(audioRef.current.currentTime));
         });
+    }
+
+    function handleSeek(amount: number) {
+        audioRef.current.currentTime = amount;
+        setProgress(amount);
+    }
+
+    function handleEpisodeEnded() {
+        if (hasNext) {
+            playNext();
+        } else {
+            clearPlayerState();
+        }
     }
 
     const episode = episodeList[currentEpisodeIndex];
@@ -81,6 +95,7 @@ export function Player() {
                             <Slider
                                 max={episode.duration}
                                 value={progress}
+                                onChange={handleSeek}
                                 trackStyle={{ backgroundColor: '#04d361' }}
                                 railStyle={{ backgroundColor: '#9f75ff' }}
                                 handleStyle={{ borderColor: '#04d361', borderWidth: 4 }}
@@ -97,6 +112,7 @@ export function Player() {
                         src={episode.url}
                         ref={audioRef}
                         autoPlay
+                        onEnded={handleEpisodeEnded}
                         loop={isLooping}
                         onPlay={() => setPlayingState(true)}
                         onPause={() => setPlayingState(false)}
@@ -108,7 +124,7 @@ export function Player() {
                     <button
                         type="button"
                         disabled={!episode || episodeList.length === 1}
-                        onClick={toogleShuffle}
+                        onClick={toggleShuffle}
                         className={isShuffling ? styles.isActive : ''}
                     >
                         <img src="/shuffle.svg" alt="Embaralhar" />
@@ -132,7 +148,7 @@ export function Player() {
                     <button
                         type="button"
                         disabled={!episode}
-                        onClick={toogleLoop}
+                        onClick={toggleLoop}
                         className={isLooping ? styles.isActive : ''}
                     >
                         <img src="/repeat.svg" alt="Repetir" />
